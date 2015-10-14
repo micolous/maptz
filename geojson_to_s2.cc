@@ -14,12 +14,6 @@
 
 using namespace std;
 
-/*
-struct tzgeom {
-	S2Polygon* poly;
-	string* tzid;
-};
-*/
 int main(int argc, char** argv) {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 	if (argc != 3) {
