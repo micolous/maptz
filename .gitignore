@@ -1,0 +1,5 @@
+geojson_to_s2
+*.pb.cc
+*.pb.h
+*.txt
+*~
