@@ -3,8 +3,8 @@ package maptz;
 message CoverageBundleRaw {
 	message TzCoverage {
 		required string tzid = 1;
-		repeated uint64 cells = 2;
+		repeated uint64 cell = 2;
 	}
 
-	repeated TzCoverage timezones = 1;
+	repeated TzCoverage timezone = 1;
 }

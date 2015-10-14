@@ -4,14 +4,15 @@
 #include <s2/s2regioncoverer.h>
 #include <s2/s2regionunion.h>
 
+#include <fstream>
 #include <inttypes.h>
 #include <map>
 #include <string>
 #include <vector>
 
-using std::map;
-using std::string;
-using std::vector;
+#include "coveragebundle.pb.h"
+
+using namespace std;
 
 /*
 struct tzgeom {
@@ -20,8 +21,9 @@ struct tzgeom {
 };
 */
 int main(int argc, char** argv) {
-	if (argc != 2) {
-		printf("Usage: %s [shapefile]\n", argv[0]);
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	if (argc != 3) {
+		printf("Usage: %s [shapefile] [outfile]\n", argv[0]);
 		return 1;
 	}
 
@@ -107,36 +109,37 @@ int main(int argc, char** argv) {
 
 	// Build coverages
 	printf("Building coverages...\n");
-	map<string, vector<S2CellId> > timezone_coverages;
+	maptz::CoverageBundleRaw timezone_coverages;
+	//map<string, vector<S2CellId> > timezone_coverages;
 	
 	for (map<string, S2RegionUnion*>::iterator iter = timezones.begin(); iter != timezones.end(); ++iter) {
-		vector<S2CellId> coverages;
-		coverer.GetCovering(*(iter->second), &coverages);
-		timezone_coverages[iter->first] = coverages;
+		vector<S2CellId> cells;
+		maptz::CoverageBundleRaw::TzCoverage* tz = timezone_coverages.add_timezone();
+		tz->set_tzid(iter->first);
+
+		coverer.GetCovering(*(iter->second), &cells);
+		for (vector<S2CellId>::iterator citer = cells.begin(); citer != cells.end(); ++citer) {
+			tz->add_cell(citer->id());
+		}
 	}
 
-	printf("%d coverages built.\n", timezone_coverages.size());
+	printf("%d coverages built.\n", timezone_coverages.timezone_size());
 
 #ifdef SINGLE_TZ
 	// Dump out the coverages for each zone
 	printf(SINGLE_TZ ":\n");
-	vector<S2CellId> sydney = timezone_coverages[SINGLE_TZ];
-	for (int x=0; x<sydney.size(); x++) {
-		printf("%" PRIu64 ",\n", sydney[x].id());
+	const maptz::CoverageBundleRaw::TzCoverage sydney = timezone_coverages.timezone(0);
+	for (int x=0; x<sydney.cell_size(); x++) {
+		printf("%" PRIu64 ",\n", sydney.cell(x));
 	}
 #endif
-/*
-	printf("%d geometries.\n", geometries.size());
 
-	uint64 face = 3, max_level = 6;
-	// Start at level 1 cells on that face
-	const S2Cell start_cellid ((face << 61) + ((uint64)(1) << 60));
-
-	// Find all the tzgeom that interset with this cell
-	S2Polygon* cell_poly = new S2Polygon(start_cellid);
-	for (int x=0; x<geometries.size(); x++) {
-		geometries[x]->poly->Intersects(cell_poly);
+	// Dump to file
+	fstream output(argv[2], ios::out | ios::trunc | ios::binary);
+	if (!timezone_coverages.SerializeToOstream(&output)) {
+		printf("Failed to write data to disk. :(\n");
+		return 1;
 	}
-*/
+	google::protobuf::ShutdownProtobufLibrary();
 	return 0;
 }
