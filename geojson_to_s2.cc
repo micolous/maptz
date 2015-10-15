@@ -120,12 +120,14 @@ int main(int argc, char** argv) {
 	printf("%d coverages built.\n", timezone_coverages.timezone_size());
 
 #ifdef SINGLE_TZ
-	// Dump out the coverages for each zone
-	printf(SINGLE_TZ ":\n");
+	// Dump out the coverages for a single zone, used to test
+	// This can be visualised with s2map.com
+	printf("\n" SINGLE_TZ ":\n");
 	const maptz::CoverageBundleRaw::TzCoverage sydney = timezone_coverages.timezone(0);
 	for (int x=0; x<sydney.cell_size(); x++) {
 		printf("%" PRIu64 ",\n", sydney.cell(x));
 	}
+	printf("\n");
 #endif
 
 	// Dump to file

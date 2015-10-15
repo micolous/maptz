@@ -1,3 +1,5 @@
+index_s2pb
+lookup_s2pb
 geojson_to_s2
 geojson_to_s2_test
 *.pb.cc
@@ -5,3 +7,4 @@ geojson_to_s2_test
 *.txt
 *~
 *.pb
+*.pb.bz2

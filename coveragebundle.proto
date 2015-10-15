@@ -8,3 +8,28 @@ message CoverageBundleRaw {
 
 	repeated TzCoverage timezone = 1;
 }
+
+message S2Index {
+	optional S2IndexNode face0 = 1;
+	optional S2IndexNode face1 = 2;
+	optional S2IndexNode face2 = 3;
+	optional S2IndexNode face3 = 4;
+	optional S2IndexNode face4 = 5;
+	optional S2IndexNode face5 = 6;
+
+	repeated string polylist = 7;
+}
+
+message S2IndexNode {
+	// Children to inspect
+	optional S2IndexNode child00 = 1;
+	optional S2IndexNode child01 = 2;
+	optional S2IndexNode child10 = 3;
+	optional S2IndexNode child11 = 4;
+
+	// When the node has a polyid associated with it, return the polyid
+	// If we have more levels to search, then we should iterate through all of
+	// the children too.
+	repeated uint32 polyid = 5;
+}
+
