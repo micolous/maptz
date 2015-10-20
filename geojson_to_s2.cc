@@ -16,10 +16,19 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
-	if (argc != 3) {
-		printf("Usage: %s [shapefile] [outfile]\n", argv[0]);
+	if (argc < 3 || argc > 4) {
+		printf("Usage: %s <shapefile> <outfile> [maxlevel]\n", argv[0]);
 		return 1;
 	}
+	
+	int maxlevel = 10;
+	if (argc == 4) {
+		maxlevel = atoi(argv[3]);
+	}
+	if (maxlevel <= 0 || maxlevel > 30) {
+		maxlevel = 10;
+	}
+	printf("Covering with S2 accuracy level: %d\n", maxlevel);
 
 	OGRRegisterAll();
 	OGRDataSource *poDS;
@@ -93,12 +102,12 @@ int main(int argc, char** argv) {
 	}
 
 	// Report on the amount of Timezones we have.
-	printf("Found %d zones.\n", timezones.size());
+	printf("Found %" PRIu64 " zones.\n", timezones.size());
 
 	// Setup a coverage generator
 	S2RegionCoverer coverer;
 	coverer.set_min_level(1);
-	coverer.set_max_level(10);
+	coverer.set_max_level(maxlevel);
 	coverer.set_max_cells(10000);
 
 	// Build coverages
@@ -117,7 +126,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	printf("%d coverages built.\n", timezone_coverages.timezone_size());
+	printf("%" PRIu32 " coverages built.\n", timezone_coverages.timezone_size());
 
 #ifdef SINGLE_TZ
 	// Dump out the coverages for a single zone, used to test
