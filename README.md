@@ -6,6 +6,8 @@ This converts a series of geojson polygon geometries into an index of S2 coverag
 
 This is stored as a tree, then converted to protobuf format for small file size.  Currently this only has a C++ implementation.
 
+This requires libgdal-dev, libprotobuf-dev, and [libs2-dev](https://github.com/micolous/s2-geometry-library).
+
 ## Creating the database
 
 At present, this is built around a [timezone map of the world](http://efele.net/maps/tz/world/).
@@ -53,3 +55,10 @@ $ ./lookup_s2pb world_index.pb 35011667 135768333
 Result for cellid 3/000000201010123002102101101110:
  - Asia/Tokyo
 ```
+
+Because the coverage is generated to "overlap" a certain polygon (rather than be contained within it), some cells near borders may be return multiple results, which could be wrong.  The error margin is a cell of up to the size of the smallest cell generated.
+
+Each region will be represented by up to 10,000 cells (hard coded limit).  While L30 cells could be used, in reality the maximum cell count will be hit for most large regions.
+
+A coverage to an accuracy of level 10 will have an error of up to about 53-102 km² (depending on distance from the equator).  At level 11, this reduces to 13-26 km², and at level 12 this reduces to 3.3-6.4 km².  Each increase typically doubles file size.
+
